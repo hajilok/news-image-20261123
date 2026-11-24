@@ -11,211 +11,189 @@ const OUT_DIR = process.env.CANDIDATES_DIR ?? '/tmp/news-candidates';
 
 function imgDataUri(fileName) {
   const fullPath = join(ART_DIR, fileName);
-  const fallback = join(ART_DIR, 'ill_08_nasa_moon.jpg');
-  const resolved = existsSync(fullPath) ? fullPath : fallback;
-  const b64 = readFileSync(resolved).toString('base64');
+  if (!existsSync(fullPath)) {
+    throw new Error(`Missing staged illustration: ${fullPath}`);
+  }
+  const b64 = readFileSync(fullPath).toString('base64');
   return `data:image/jpeg;base64,${b64}`;
 }
 
-function buildWorldMapSvg(stories) {
-  const w = 252;
-  const h = 84;
-  // Equirectangular simplified landmass polygons scaled cleanly to 252x84
-  const continents = [
-    // North America
-    'M 14,14 L 33,11 L 53,10 L 72,13 L 85,20 L 79,27 L 70,31 L 63,36 L 59,40 L 53,39 L 49,35 L 41,31 L 34,25 L 24,21 Z',
-    // Greenland
-    'M 90,5 L 109,5 L 112,11 L 102,16 L 92,13 Z',
-    // South America
-    'M 71,42 L 85,41 L 96,47 L 101,55 L 94,65 L 85,76 L 77,79 L 73,71 L 74,60 L 68,50 Z',
-    // Europe
-    'M 118,16 L 132,11 L 149,10 L 160,14 L 158,21 L 149,25 L 139,25 L 130,26 L 121,23 Z',
-    // Africa
-    'M 119,28 L 139,27 L 152,29 L 162,37 L 164,45 L 156,56 L 148,65 L 139,64 L 133,55 L 130,45 L 120,40 L 115,34 Z',
-    // Madagascar
-    'M 162,54 L 165,53 L 166,60 L 162,60 Z',
-    // Asia
-    'M 159,12 L 188,10 L 219,12 L 236,16 L 231,24 L 220,28 L 215,36 L 207,39 L 197,43 L 189,38 L 183,34 L 173,36 L 165,32 L 155,28 L 157,20 Z',
-    // Japan / SE Asia Islands
-    'M 225,25 L 229,27 L 227,31 L 223,29 Z',
-    'M 206,45 L 219,45 L 223,48 L 211,49 Z',
-    // Australia
-    'M 207,55 L 225,53 L 235,59 L 233,68 L 220,70 L 209,65 Z',
-    // New Zealand
-    'M 241,69 L 245,67 L 244,73 L 240,73 Z'
-  ];
-
-  const leaders = stories
-    .filter((s) => s.mapPin[0] !== s.mapTarget[0] || s.mapPin[1] !== s.mapTarget[1])
-    .map(
-      (s) => `
-      <line x1="${s.mapPin[0]}" y1="${s.mapPin[1]}" x2="${s.mapTarget[0]}" y2="${s.mapTarget[1]}" stroke="#223044" stroke-width="1.15" opacity="0.7"/>
-      <circle cx="${s.mapTarget[0]}" cy="${s.mapTarget[1]}" r="1.8" fill="#223044"/>
-    `
-    )
-    .join('');
-
-  const pins = stories
-    .map((s) => {
-      const [px, py] = s.mapPin;
-      const isSpace = s.id === 'nasa';
-      return `
-        <g>
-          ${isSpace ? `<circle cx="${px}" cy="${py}" r="10.2" fill="none" stroke="${s.accent}" stroke-width="1.1" stroke-dasharray="2.4 2" opacity="0.85"/>` : ''}
-          <circle cx="${px}" cy="${py}" r="6.8" fill="${s.accent}" stroke="#FBF8F2" stroke-width="1.6"/>
-          <text x="${px}" y="${py + 3.1}" text-anchor="middle" font-family="Liberation Sans, sans-serif" font-size="8.6" font-weight="800" fill="#FFFFFF">${s.num}</text>
-        </g>
-      `;
-    })
-    .join('\n');
-
-  return `
-    <svg viewBox="0 0 ${w} ${h}" width="${w}" height="${h}" xmlns="http://www.w3.org/2000/svg" style="display:block;border-radius:4px;">
-      <rect x="0.5" y="0.5" width="${w - 1}" height="${h - 1}" rx="3.5" fill="#ECE4D4" stroke="#BCAE94" stroke-width="1.2"/>
-      <line x1="0" y1="${h * 0.5}" x2="${w}" y2="${h * 0.5}" stroke="rgba(22,32,48,0.12)" stroke-width="0.8" stroke-dasharray="3 3"/>
-      <line x1="${w * 0.5}" y1="0" x2="${w * 0.5}" y2="${h}" stroke="rgba(22,32,48,0.12)" stroke-width="0.8" stroke-dasharray="3 3"/>
-      ${continents.map((d) => `<path d="${d}" fill="#C7B99F" stroke="#96876C" stroke-width="0.8" stroke-linejoin="round"/>`).join('')}
-      ${leaders}
-      ${pins}
-    </svg>
-  `;
-}
-
-function renderMainCard(story) {
+function renderHeroStory(story) {
   const imgSrc = imgDataUri(story.art);
   return `
-    <article style="
-      background:#FBF8F2;
-      border:1px solid #CFC4B0;
-      border-top:4px solid ${story.accent};
-      border-radius:3px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:column;
-      height:248px;
-      box-shadow:0 1.5px 4px rgba(24,20,14,0.08);
-    ">
-      <div style="position:relative;width:100%;height:150px;overflow:hidden;background:#101824;">
+    <article style="display:flex;flex-direction:column;gap:7px;height:100%;">
+      <div style="
+        width:100%;height:204px;overflow:hidden;
+        background:#111926;border:1px solid #B9AB92;
+      ">
         <img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;display:block;${story.artStyle}" />
-        <div style="
-          position:absolute;top:7px;left:7px;
-          width:25px;height:25px;border-radius:50%;
-          background:${story.accent};color:#FFFFFF;
-          border:2px solid #FBF8F2;
-          display:flex;align-items:center;justify-content:center;
-          font-family:'Liberation Sans',sans-serif;font-size:13.5px;font-weight:900;
-          box-shadow:0 1.5px 4px rgba(0,0,0,0.45);
-        ">${story.num}</div>
-        <div style="
-          position:absolute;bottom:7px;right:7px;
-          background:rgba(11,17,28,0.92);color:#FFFFFF;
-          padding:3.5px 9px;border-radius:2px;
-          font-family:'Liberation Sans',sans-serif;font-size:13px;
-          font-weight:800;letter-spacing:0.04em;
-          border:1px solid rgba(255,255,255,0.22);
-          box-shadow:0 1px 4px rgba(0,0,0,0.35);
-        ">${story.badge}</div>
       </div>
-      <div style="padding:7px 12px 8px;display:flex;flex-direction:column;gap:3px;flex:1;justify-content:center;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;">
+      <div style="display:flex;flex-direction:column;gap:4px;padding-top:1px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:14px;height:3.5px;background:${story.accent};display:inline-block;"></span>
           <span style="
-            font-family:'Liberation Sans',sans-serif;font-size:13px;font-weight:800;
-            letter-spacing:0.065em;color:${story.accent};text-transform:uppercase;
-          ">${story.region}</span>
-          <span style="
-            font-family:'Liberation Sans',sans-serif;font-size:11.5px;font-weight:800;
-            letter-spacing:0.05em;color:#1D2736;background:#EAE2D2;
-            padding:1.5px 7px;border-radius:2px;text-transform:uppercase;
-          ">${story.beat}</span>
+            font-family:'Liberation Sans',sans-serif;
+            font-size:15px;font-weight:900;letter-spacing:0.08em;
+            color:${story.accent};text-transform:uppercase;line-height:1;
+          ">${story.kicker}</span>
         </div>
         <h2 style="
           margin:0;
           font-family:'Liberation Sans',sans-serif;
-          font-size:23px;
-          font-weight:900;
-          line-height:1.06;
-          letter-spacing:-0.015em;
-          color:#0E131B;
+          font-size:28px;font-weight:900;line-height:1.06;
+          letter-spacing:-0.02em;color:#0B1018;
           white-space:nowrap;
         ">${story.headline}</h2>
         <p style="
           margin:0;
           font-family:'Liberation Sans',sans-serif;
-          font-size:15.5px;
-          font-weight:600;
-          line-height:1.22;
-          color:#222B38;
+          font-size:17.5px;font-weight:600;line-height:1.22;
+          color:#1B2432;
         ">${story.subline}</p>
       </div>
     </article>
   `;
 }
 
-function renderBriefCard(story) {
+function renderMidStory(story) {
   const imgSrc = imgDataUri(story.art);
+  const headlineHtml = story.headlineLines.join('<br/>');
   return `
-    <article style="
-      background:#FBF8F2;
-      border:1px solid #CFC4B0;
-      border-top:3.5px solid ${story.accent};
-      border-radius:3px;
-      overflow:hidden;
-      display:flex;
-      flex-direction:row;
-      height:116px;
-      box-shadow:0 1.5px 4px rgba(24,20,14,0.08);
-    ">
-      <div style="position:relative;width:154px;height:100%;flex-shrink:0;overflow:hidden;background:#101824;">
+    <article style="display:flex;flex-direction:column;gap:7px;height:100%;">
+      <div style="
+        width:100%;height:160px;overflow:hidden;
+        background:#111926;border:1px solid #B9AB92;
+      ">
         <img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;display:block;${story.artStyle}" />
-        <div style="
-          position:absolute;top:6px;left:6px;
-          width:23px;height:23px;border-radius:50%;
-          background:${story.accent};color:#FFFFFF;
-          border:2px solid #FBF8F2;
-          display:flex;align-items:center;justify-content:center;
-          font-family:'Liberation Sans',sans-serif;font-size:12.5px;font-weight:900;
-          box-shadow:0 1px 4px rgba(0,0,0,0.45);
-        ">${story.num}</div>
       </div>
-      <div style="padding:7px 11px 7px 12px;display:flex;flex-direction:column;gap:3px;flex:1;justify-content:center;">
-        <div style="display:flex;align-items:center;justify-content:space-between;gap:6px;">
+      <div style="display:flex;flex-direction:column;gap:4px;padding-top:1px;">
+        <div style="display:flex;align-items:center;gap:6px;">
+          <span style="width:12px;height:3.5px;background:${story.accent};display:inline-block;"></span>
           <span style="
-            font-family:'Liberation Sans',sans-serif;font-size:12.5px;font-weight:800;
-            letter-spacing:0.06em;color:${story.accent};text-transform:uppercase;
-          ">${story.region}</span>
-          <span style="
-            font-family:'Liberation Sans',sans-serif;font-size:11px;font-weight:800;
-            letter-spacing:0.04em;color:#1D2736;background:#EAE2D2;
-            padding:1.5px 6px;border-radius:2px;text-transform:uppercase;
-          ">${story.beat}</span>
+            font-family:'Liberation Sans',sans-serif;
+            font-size:14.5px;font-weight:900;letter-spacing:0.06em;
+            color:${story.accent};text-transform:uppercase;line-height:1;
+            white-space:nowrap;
+          ">${story.kicker}</span>
         </div>
         <h2 style="
           margin:0;
           font-family:'Liberation Sans',sans-serif;
-          font-size:19.5px;
-          font-weight:900;
-          line-height:1.06;
-          letter-spacing:-0.015em;
-          color:#0E131B;
-          white-space:nowrap;
-        ">${story.headline}</h2>
+          font-size:22.5px;font-weight:900;line-height:1.08;
+          letter-spacing:-0.018em;color:#0B1018;
+        ">${headlineHtml}</h2>
         <p style="
           margin:0;
           font-family:'Liberation Sans',sans-serif;
-          font-size:14.8px;
-          font-weight:600;
-          line-height:1.22;
-          color:#222B38;
+          font-size:16px;font-weight:600;line-height:1.22;
+          color:#1B2432;
         ">${story.subline}</p>
       </div>
     </article>
   `;
 }
 
-function buildMasterHtml(data) {
-  const mainStories = data.stories.filter((s) => s.tier === 'main');
-  const briefStories = data.stories.filter((s) => s.tier === 'brief');
-  const mapSvg = buildWorldMapSvg(data.stories);
+function renderBottomStory(story) {
+  const imgSrc = imgDataUri(story.art);
+  return `
+    <article style="display:flex;flex-direction:column;gap:6px;height:100%;">
+      <div style="
+        width:100%;height:142px;overflow:hidden;
+        background:#111926;border:1px solid #B9AB92;
+      ">
+        <img src="${imgSrc}" style="width:100%;height:100%;object-fit:cover;display:block;${story.artStyle}" />
+      </div>
+      <div style="display:flex;flex-direction:column;gap:3.5px;padding-top:1px;">
+        <div style="display:flex;align-items:center;gap:7px;">
+          <span style="width:13px;height:3.5px;background:${story.accent};display:inline-block;"></span>
+          <span style="
+            font-family:'Liberation Sans',sans-serif;
+            font-size:14.5px;font-weight:900;letter-spacing:0.07em;
+            color:${story.accent};text-transform:uppercase;line-height:1;
+          ">${story.kicker}</span>
+        </div>
+        <h2 style="
+          margin:0;
+          font-family:'Liberation Sans',sans-serif;
+          font-size:23px;font-weight:900;line-height:1.06;
+          letter-spacing:-0.022em;color:#0B1018;
+          white-space:nowrap;
+        ">${story.headline}</h2>
+        <p style="
+          margin:0;
+          font-family:'Liberation Sans',sans-serif;
+          font-size:16.2px;font-weight:600;line-height:1.2;
+          color:#1B2432;
+        ">${story.subline}</p>
+      </div>
+    </article>
+  `;
+}
+
+function buildMasthead(data, styleVariant) {
+  if (styleVariant === 'navy') {
+    return `
+      <header style="
+        background:#111C2D;
+        border-top:4.5px solid #C83E2B;
+        padding:12px 20px 10px;
+        height:94px;
+        display:flex;flex-direction:column;justify-content:center;align-items:center;
+        gap:5px;
+      ">
+        <div style="display:flex;align-items:center;gap:14px;width:100%;">
+          <span style="height:1.2px;flex:1;background:rgba(243,220,158,0.5);"></span>
+          <span style="
+            font-family:'Liberation Sans',sans-serif;
+            font-size:16.5px;font-weight:900;letter-spacing:0.16em;
+            color:#F3DC9E;text-transform:uppercase;line-height:1;
+          ">${data.edition}</span>
+          <span style="height:1.2px;flex:1;background:rgba(243,220,158,0.5);"></span>
+        </div>
+        <h1 style="
+          margin:0;
+          font-family:'C059','P052','Liberation Serif',Georgia,serif;
+          font-size:51px;font-weight:700;line-height:1.0;
+          letter-spacing:0.01em;color:#FAF6EE;
+          white-space:nowrap;
+        ">${data.dateLabel}</h1>
+      </header>
+    `;
+  }
+
+  return `
+    <header style="
+      border-top:4.5px solid #11161F;
+      border-bottom:2.5px solid #11161F;
+      padding:7px 0 8px;
+      height:88px;
+      display:flex;flex-direction:column;justify-content:center;align-items:center;
+      gap:3px;
+    ">
+      <div style="display:flex;align-items:center;gap:14px;width:100%;">
+        <span style="height:1.5px;flex:1;background:#B83826;opacity:0.55;"></span>
+        <span style="
+          font-family:'Liberation Sans',sans-serif;
+          font-size:15px;font-weight:900;letter-spacing:0.16em;
+          color:#B83826;text-transform:uppercase;line-height:1;
+        ">${data.edition}</span>
+        <span style="height:1.5px;flex:1;background:#B83826;opacity:0.55;"></span>
+      </div>
+      <h1 style="
+        margin:0;
+        font-family:'C059','P052','Liberation Serif',Georgia,serif;
+        font-size:54px;font-weight:700;line-height:1.0;
+        letter-spacing:0.005em;color:#0B1018;
+        white-space:nowrap;
+      ">${data.dateLabel}</h1>
+    </header>
+  `;
+}
+
+function buildBroadsheetHtml(data, styleVariant = 'archival') {
+  const heroes = data.stories.filter((s) => s.tier === 'hero');
+  const mids = data.stories.filter((s) => s.tier === 'mid');
+  const bottoms = data.stories.filter((s) => s.tier === 'bottom');
 
   return `<!doctype html>
 <html>
@@ -229,7 +207,7 @@ function buildMasterHtml(data) {
     width: 1024px;
     height: 1024px;
     overflow: hidden;
-    background: #F4EEE2;
+    background: #F5EFE2;
     -webkit-font-smoothing: antialiased;
     text-rendering: geometricPrecision;
   }
@@ -239,52 +217,54 @@ function buildMasterHtml(data) {
   <div style="
     width:1024px;height:1024px;
     padding:12px 16px 12px;
-    display:flex;flex-direction:column;gap:10px;
-    background:#F4EEE2;
+    display:flex;flex-direction:column;
+    background:#F5EFE2;
   ">
-    <header style="
-      display:flex;align-items:center;justify-content:space-between;
-      border-top:4.5px solid #141A24;
-      border-bottom:2.5px solid #141A24;
-      padding:6px 0 7px;
-      height:104px;
-      gap:14px;
-    ">
-      <div style="display:flex;flex-direction:column;justify-content:center;gap:2.5px;flex:1;">
-        <div style="display:flex;align-items:center;gap:10px;">
-          <span style="
-            font-family:'Liberation Sans',sans-serif;
-            font-size:14px;font-weight:900;letter-spacing:0.12em;
-            color:#B83A28;text-transform:uppercase;
-          ">${data.edition}</span>
-          <span style="height:1.5px;flex:1;background:rgba(20,26,36,0.22);"></span>
-        </div>
-        <h1 style="
-          margin:0;
-          font-family:'C059','P052','Liberation Serif',Georgia,serif;
-          font-size:44px;
-          font-weight:700;
-          line-height:1.0;
-          letter-spacing:-0.018em;
-          color:#0E131B;
-        ">${data.dateLabel}</h1>
-        <div style="
-          font-family:'Liberation Sans',sans-serif;
-          font-size:13px;font-weight:700;letter-spacing:0.035em;
-          color:#364152;
-        ">${data.beatsLine}</div>
-      </div>
-      <div style="flex-shrink:0;">
-        ${mapSvg}
-      </div>
-    </header>
+    ${buildMasthead(data, styleVariant)}
 
-    <main style="display:flex;flex-direction:column;gap:10px;flex:1;">
-      <section style="display:grid;grid-template-columns:1fr 1fr;gap:10px 14px;">
-        ${mainStories.map((s) => renderMainCard(s)).join('\n')}
+    <main style="display:flex;flex-direction:column;flex:1;margin-top:11px;">
+      <!-- Tier 1: Dual Hero Leads -->
+      <section style="
+        display:grid;
+        grid-template-columns:1fr 1px 1fr;
+        column-gap:12px;
+        height:332px;
+        padding-bottom:10px;
+        border-bottom:1.5px solid #C6B9A0;
+      ">
+        ${renderHeroStory(heroes[0])}
+        <div style="background:#C6B9A0;width:1px;height:100%;"></div>
+        ${renderHeroStory(heroes[1])}
       </section>
-      <section style="display:grid;grid-template-columns:1fr 1fr;gap:14px;">
-        ${briefStories.map((s) => renderBriefCard(s)).join('\n')}
+
+      <!-- Tier 2: Three-Column Global Dispatch -->
+      <section style="
+        display:grid;
+        grid-template-columns:1fr 1px 1fr 1px 1fr;
+        column-gap:10px;
+        height:326px;
+        padding-top:10px;
+        padding-bottom:10px;
+        border-bottom:1.5px solid #C6B9A0;
+      ">
+        ${renderMidStory(mids[0])}
+        <div style="background:#C6B9A0;width:1px;height:100%;"></div>
+        ${renderMidStory(mids[1])}
+        <div style="background:#C6B9A0;width:1px;height:100%;"></div>
+        ${renderMidStory(mids[2])}
+      </section>
+
+      <!-- Tier 3: Two-Column Wide World Row -->
+      <section style="
+        display:grid;
+        grid-template-columns:1fr 1px 1fr;
+        column-gap:12px;
+        flex:1;
+        padding-top:11px;
+      ">
+        ${renderBottomStory(bottoms[0])}
+        <div style="background:#C6B9A0;width:1px;height:100%;"></div>
+        ${renderBottomStory(bottoms[1])}
       </section>
     </main>
   </div>
@@ -292,13 +272,12 @@ function buildMasterHtml(data) {
 </html>`;
 }
 
-function renderFinal(outImagePath, thumbPath, quality = 91) {
-  const data = JSON.parse(readFileSync(STORIES_PATH, 'utf8'));
+function renderVariant(data, styleVariant, outImagePath, thumbPath, quality = 90) {
   mkdirSync(OUT_DIR, { recursive: true });
-  const htmlPath = join(OUT_DIR, 'master_v2.html');
-  const rawPngPath = join(OUT_DIR, 'master_v2_2x.png');
+  const htmlPath = join(OUT_DIR, `r2_${styleVariant}.html`);
+  const rawPngPath = join(OUT_DIR, `r2_${styleVariant}_2x.png`);
 
-  writeFileSync(htmlPath, buildMasterHtml(data), 'utf8');
+  writeFileSync(htmlPath, buildBroadsheetHtml(data, styleVariant), 'utf8');
 
   execFileSync(
     'chromium',
@@ -335,9 +314,28 @@ print("Rendered:", "${outImagePath}", im1024.size, os.path.getsize("${outImagePa
   );
 }
 
-const mode = process.argv[2] ?? 'preview';
-if (mode === 'ship') {
-  renderFinal(resolve(REPO_ROOT, 'entry.png'), join(OUT_DIR, 'shipped_300px.png'), 88);
+const data = JSON.parse(readFileSync(STORIES_PATH, 'utf8'));
+const cmd = process.argv[2] ?? 'compare';
+
+if (cmd === 'compare') {
+  renderVariant(
+    data,
+    'archival',
+    join(OUT_DIR, 'r2_V3A_archival.jpg'),
+    join(OUT_DIR, 'r2_V3A_archival_300px.png'),
+    90
+  );
+  renderVariant(
+    data,
+    'navy',
+    join(OUT_DIR, 'r2_V3B_navy.jpg'),
+    join(OUT_DIR, 'r2_V3B_navy_300px.png'),
+    90
+  );
+} else if (cmd === 'ship-archival') {
+  renderVariant(data, 'archival', resolve(REPO_ROOT, 'entry.png'), join(OUT_DIR, 'r2_shipped_300px.png'), 89);
+} else if (cmd === 'ship-navy') {
+  renderVariant(data, 'navy', resolve(REPO_ROOT, 'entry.png'), join(OUT_DIR, 'r2_shipped_300px.png'), 89);
 } else {
-  renderFinal(join(OUT_DIR, 'candidate_V2_master.jpg'), join(OUT_DIR, 'candidate_V2_master_300px.png'), 88);
+  throw new Error(`Unknown render command: ${cmd}`);
 }
