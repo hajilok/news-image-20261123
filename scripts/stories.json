@@ -1,76 +1,89 @@
 {
   "dateLabel": "MONDAY, 23 NOVEMBER 2026",
   "edition": "WORLD NEWS · ONE DAY IN REVIEW",
-  "stories": [
-    {
+  "stories": {
+    "cop31": {
       "id": "cop31",
-      "tier": "hero",
       "kicker": "CLIMATE · TÜRKIYE",
-      "accent": "#9E2A1A",
+      "accent": "#A32A1A",
       "headline": "COP31 ENDS WITH NO PACT",
-      "subline": "UN Antalya talks collapse over fossil fuels — 1st failure since 2009",
+      "subline": "UN Antalya talks collapse over fossil fuels — 1st COP failure since 2009",
+      "sublineShort": "UN Antalya talks collapse over fossil fuels — 1st COP failure since 2009",
       "art": "ill_02_cop31.jpg",
-      "artStyle": "transform: scale(1.05); object-position: 50% 38%;"
+      "artStyle": "transform: scale(1.05); object-position: 50% 42%;"
     },
-    {
+    "nvidia": {
       "id": "nvidia",
-      "tier": "hero",
       "kicker": "MARKETS · USA",
-      "accent": "#0C5637",
+      "accent": "#0B5938",
       "headline": "NVIDIA REINSTATES CEO HUANG",
-      "subline": "Stock surges 31.5% (+$950B); Nasdaq jumps 6.5% after board reversal",
+      "headlineLines": ["NVIDIA REINSTATES", "CEO JENSEN HUANG"],
+      "subline": "Shares surge 31.5% (+$950B) after board reversal; Nasdaq jumps 6.5%",
+      "sublineShort": "Shares surge 31.5% (+$950B) after board reversal; Nasdaq jumps 6.5%",
       "art": "ill_01_nvidia.jpg",
-      "artStyle": "object-position: 50% 30%;"
+      "artStyle": "object-position: 50% 34%;"
     },
-    {
+    "corvette": {
       "id": "corvette",
-      "tier": "mid",
       "kicker": "CONFLICT · UKRAINE / LIBYA",
-      "accent": "#143A63",
+      "accent": "#153D68",
       "headlineLines": ["UKRAINE DRONES SINK", "RUSSIAN CORVETTE"],
-      "subline": "Zelenskyy confirms 2,400 km strike on Merkury in Benghazi",
-      "art": "ill_r2_ukraine_drones.jpg",
-      "artStyle": "object-position: 50% 50%;"
+      "subline": "Zelenskyy confirms 2,400 km Benghazi strike on warship Merkury",
+      "sublineShort": "Zelenskyy confirms 2,400 km Benghazi strike on warship Merkury",
+      "art": "ill_03_corvette.jpg",
+      "artStyle": "transform: scale(1.07); object-position: 50% 56%;"
     },
-    {
-      "id": "hormuz",
-      "tier": "mid",
-      "kicker": "ENERGY · HORMUZ / IRAN",
-      "accent": "#9B3B10",
-      "headlineLines": ["IRAN CITES 3 TANKER", "MINE HITS IN HORMUZ"],
-      "subline": "Blasts reported amid U.S. naval blockade; oil transit disrupted",
-      "art": "ill_r2_hormuz_v2.jpg",
-      "artStyle": "object-position: 50% 50%;"
+    "india_nepal": {
+      "id": "india_nepal",
+      "kicker": "DIPLOMACY · INDIA / NEPAL",
+      "accent": "#A24E0E",
+      "headlineLines": ["INDIA PLEDGES $1.6B", "FOR NEPAL RECOVERY"],
+      "subline": "New Delhi summit seals flood aid, energy & cross-border rail",
+      "sublineShort": "New Delhi summit seals flood aid, energy & cross-border rail",
+      "art": "ill_06_india_nepal.jpg",
+      "artStyle": "object-position: 50% 48%;"
     },
-    {
+    "drc": {
       "id": "drc",
-      "tier": "mid",
       "kicker": "HEALTH · DR CONGO",
-      "accent": "#841E1E",
+      "accent": "#871E1E",
       "headlineLines": ["FIGHTING TRAPS WHO", "EBOLA TEAMS IN ITURI"],
-      "subline": "Medics pinned in hospital 24+ hrs; WHO chief urges passage",
+      "subline": "Clashes pin medics in hospital 24+ hrs; WHO urges safe passage",
+      "sublineShort": "Clashes pin medics in hospital 24+ hrs; WHO urges safe passage",
       "art": "ill_05_drc.jpg",
       "artStyle": "object-position: 50% 34%;"
     },
-    {
+    "uk_rohingya": {
       "id": "uk_rohingya",
-      "tier": "bottom",
       "kicker": "LAW & RIGHTS · UK / MYANMAR",
-      "accent": "#1A3861",
+      "accent": "#1A3A66",
       "headline": "UK RECOGNIZES ROHINGYA GENOCIDE",
-      "subline": "After ICJ ruling, UK sanctions 5 junta leaders & curbs jet fuel",
-      "art": "ill_r2_uk_rohingya_v2.jpg",
-      "artStyle": "object-position: 50% 62%;"
+      "headlineLines": ["UK RECOGNIZES", "ROHINGYA GENOCIDE"],
+      "subline": "After ICJ ruling, UK sanctions 5 junta leaders & targets jet fuel",
+      "sublineShort": "After ICJ ruling, UK sanctions 5 junta leaders & targets jet fuel",
+      "art": "ill_r3_uk_justice_unclipped.jpg",
+      "artStyle": "object-position: 50% 54%;"
     },
-    {
-      "id": "brazil",
-      "tier": "bottom",
-      "kicker": "WEATHER · BRAZIL",
-      "accent": "#184263",
-      "headline": "BRAZIL STORMS DISPLACE 19,854",
-      "subline": "PAHO reports Rio Grande do Sul hail hit 39 towns, killing 5",
-      "art": "ill_07_brazil_hail.jpg",
-      "artStyle": "object-position: 50% 66%;"
+    "fifa": {
+      "id": "fifa",
+      "kicker": "SPORTS · AMERICAS / UK",
+      "accent": "#105E43",
+      "headline": "FIFA AWARDS 2031 & 2035 WOMEN'S CUPS",
+      "headlineLines": ["FIFA AWARDS 2031 &", "2035 WOMEN'S CUPS"],
+      "subline": "48-team 2031 to US, Mexico, Costa Rica & Jamaica; 2035 to UK",
+      "sublineShort": "48-team 2031 to US, Mexico, Costa Rica & Jamaica; 2035 to UK",
+      "art": "ill_r3_fifa_wwc.jpg",
+      "artStyle": "object-position: 50% 50%;"
+    },
+    "nasa": {
+      "id": "nasa",
+      "kicker": "SPACE · MOON / NASA",
+      "accent": "#342F72",
+      "headlineLines": ["NASA SEEKS 20 kW", "LUNAR REACTOR"],
+      "subline": "Joint DOE call invites industry bids for Moon south-pole fission by 2030",
+      "sublineShort": "Joint DOE call invites bids for Moon south-pole fission by 2030",
+      "art": "ill_08_nasa_moon_v2.jpg",
+      "artStyle": "object-position: 50% 44%;"
     }
-  ]
+  }
 }
