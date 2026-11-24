@@ -1,0 +1,6 @@
+out/
+node_modules/
+*.tar.gz
+.env
+wallet.json
+.DS_Store
